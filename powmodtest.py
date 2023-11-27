@@ -23,10 +23,7 @@ def _powmod_bs(x, y, z):
 
 
 def _powmod_catch2(a, b, m, F=pow):
-    if a == 2:
-        return (1 << b) % m
-    else:
-        return F(a, b, m)
+    return (1 << b) % m if a == 2 else F(a, b, m)
 
 def _powmod_catch22(a, b, m):
     #if a == 2:
@@ -41,11 +38,7 @@ def _powmod_catchEven(a, b, m, F=pow):
         return 1
     if a == 2:
         return (1 << b) % m
-    if a & 1 == 0:
-        return (((1 << b) % m) * F(a >> 1, b, m)) % m
-        #return (_powmod_catchEven(2,b,m) * F(a >> 1, b, m)) % m
-    else:
-        return F(a, b, m)
+    return (((1 << b) % m) * F(a >> 1, b, m)) % m if a & 1 == 0 else F(a, b, m)
 
 
 def _pow(a, b, m=None, F=powmod, verbose=False):
@@ -53,10 +46,7 @@ def _pow(a, b, m=None, F=powmod, verbose=False):
         print("pow", a, b, m)
 
     def __powmod(a, b, m, F=F):
-        if m != None:
-            return F(a, b, m)
-        else:
-            return pow(a, b)
+        return F(a, b, m) if m != None else pow(a, b)
 
     if 1 >= a >= 0:
         r = 1
@@ -82,23 +72,17 @@ def _pow(a, b, m=None, F=powmod, verbose=False):
         if a > 4:
             i = isqrt(a)
             if (i * i) == a and i > 1:
-                if b > 2:
-                    x = _pow(i, b, m)
-                else:
-                    x = a
+                x = _pow(i, b, m) if b > 2 else a
                 r = _pow(x, 2, m)
             else:
                 r = None
                 for p in [3, 5, 7, 11]:
                     if a % p == 0:
                         r = __powmod(p, b, m) * _pow(a // p, b, m)
-                if r == None:
+                if r is None:
                     r = __powmod(a, b, m)
         elif a == 3:
-            if b > 2:
-                r = __powmod(a, b, m)
-            else:
-                r = 3 << b
+            r = __powmod(a, b, m) if b > 2 else 3 << b
     else:
         return __powmod(a, b, m)
     # print(r)
@@ -145,15 +129,12 @@ def timeit(f, l, F=None):
     for a in range(0, l):
         for b in range(0, l):
             for m in range(1, l):
-                if F != None:
+                if F is None:
+                    f(a, b, m)
+                else:
                     # f(a,b,m, F=F, verbose=False)
                     f(a, b, m, F=F)
-                else:
-                    f(a, b, m)
-    if F != None:
-        Fn = F.__name__
-    else:
-        Fn = "None"
+    Fn = F.__name__ if F != None else "None"
     print("%s %s %f" % (f.__name__.ljust(30), Fn.ljust(30), time.time() - t0))
 
 
@@ -161,14 +142,11 @@ def timeit2(f, l, F=None):
     t0 = time.time()
     for b in range(0, l):
         for m in range(1, l):
-            if F != None:
-                f(b, m, F=F)
-            else:
+            if F is None:
                 f(b, m)
-    if F != None:
-        Fn = F.__name__
-    else:
-        Fn = "None"
+            else:
+                f(b, m, F=F)
+    Fn = F.__name__ if F != None else "None"
     print("%s %s %f" % (f.__name__.ljust(30), Fn.ljust(30), time.time() - t0))
 
 
